@@ -241,11 +241,10 @@ function cek_log($pi){
 }
 
 
-
-function detail_matkul($postinfo, $kls, $mk){
+function detail_matkul($pi, $kls, $mk){
 
 	$url="https://sicyca.stikom.edu/?login"; 
-
+	$postinfo = $pi;
 	$cookie_file_path = "cookie.txt";
 
 	$ch = curl_init();
@@ -269,12 +268,11 @@ function detail_matkul($postinfo, $kls, $mk){
 
 	$store = curl_exec($ch); 
 
-	//set the URL to the protected file
+	//set the URL to the protected file https://sicyca.stikom.edu/table-proxy/?t=matakuliah&
 	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=matakuliah&kls='.$kls.'&mk='.$mk);
-
+	
 	//execute the request
 	$content = curl_exec($ch);
-
 	//echo file_get_contents($content);
 	//echo $content;
 	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
@@ -332,7 +330,6 @@ function detail_matkul($postinfo, $kls, $mk){
 
 	//execute the request
 	$content = curl_exec($ch);
-
 	curl_close($ch);
 	//echo file_get_contents($content);
 	//echo $content;
@@ -407,7 +404,7 @@ if(isset($_GET['nim'])){
 if(isset($_GET['detail_matkul'])){
 	$nim = htmlspecialchars($_GET['anim']);
 	$pin = htmlspecialchars($_GET['pin']);
-	$kls = htmlspecialchars($_GET['kls']);
+	$kls = strtoupper(htmlspecialchars($_GET['kls']));
 	$mk = htmlspecialchars($_GET['mk']);
 
 	$p_info = "nim=$nim&pin=$pin";
