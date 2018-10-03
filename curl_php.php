@@ -254,7 +254,6 @@ function detail_matkul($pi, $kls, $mk){
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
 	curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file_path);
-	//set the cookie the site has for certain features, this is optional
 	curl_setopt($ch, CURLOPT_COOKIE, "cookiename=0");
 	curl_setopt($ch, CURLOPT_USERAGENT,"Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -268,13 +267,9 @@ function detail_matkul($pi, $kls, $mk){
 
 	$store = curl_exec($ch); 
 
-	//set the URL to the protected file https://sicyca.stikom.edu/table-proxy/?t=matakuliah&
 	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=matakuliah&kls='.$kls.'&mk='.$mk);
 	
-	//execute the request
 	$content = curl_exec($ch);
-	//echo file_get_contents($content);
-	//echo $content;
 	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
 
 	$html = $dom->load($content, true, true);
@@ -325,14 +320,10 @@ function detail_matkul($pi, $kls, $mk){
 	}
 
 
-	//set the URL to the protected file
 	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=kehadiran&kls='.$kls.'&mk='.$mk);
 
-	//execute the request
 	$content = curl_exec($ch);
 	curl_close($ch);
-	//echo file_get_contents($content);
-	//echo $content;
 	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
 
 	$html = $dom->load($content, true, true);
