@@ -7,6 +7,15 @@ function convert_date($tgl=''){
 	return $ex[0].'-'.get_bulan($ex[1]).'-'.$ex[2];
 }
 
+function get_string_between($string, $start, $end){
+    $string = ' ' . $string;
+    $ini = strpos($string, $start);
+    if ($ini == 0) return '';
+    $ini += strlen($start);
+    $len = strpos($string, $end, $ini) - $ini;
+    return substr($string, $ini, $len);
+}
+
 function get_bulan($v='')
 {
 	switch ($v) {
@@ -116,7 +125,6 @@ function lihat_jadwal_log($pi){
 
 
 function cek_log($pi){
-
 	$url="https://sicyca.stikom.edu/?login"; 
 	$postinfo = $pi;
 
@@ -149,16 +157,12 @@ function cek_log($pi){
 	//execute the request
 	$content = curl_exec($ch);
 
-	curl_close($ch);
-	//echo file_get_contents($content);
-	//echo $content;
 	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
 
 	$html = $dom->load($content, true, true);
 
-	$jadwal = [];
 	$i = 0;
-		$dt = [];
+	$dt = [];
 	foreach($html->find('table.tabtable tr') as $element){
 		if($element->find('td',1)){
 			if($i<=7){
@@ -167,7 +171,199 @@ function cek_log($pi){
 		}
 		$i++;
 	}
-	return $dt;
+
+	$b = array(
+					'nama' 		=> $dt[0], 
+					'nim' 		=> $dt[1], 
+					'email' 	=> $dt[2], 
+					'progstudi' => $dt[3], 
+					'jk' 		=> $dt[4], 
+					'ttl'	 	=> $dt[5], 
+					'agama' 	=> $dt[6], 
+					);
+	
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/krs');
+
+	//execute the request
+	$content = curl_exec($ch);
+
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+	$i=0;
+	$krs = [];
+	foreach($html->find('#tableView tr') as $element){
+		//echo $element;
+		$a = [];
+		$j=0;
+		foreach ($element->find('td') as $e) {
+			//echo $el->plaintext.' | ';
+			switch ($j) {
+				case 0:
+					$a['hari'] = $e->plaintext;
+					break;
+				case 1:
+					$a['waktu'] = $e->plaintext;
+					break;
+				case 2:
+					$a['matkul'] = $e->plaintext;
+					break;
+				case 4:
+					$a['ruang'] = $e->plaintext;
+					break;
+				case 5:
+					$a['sks'] = $e->plaintext;
+					break;
+				case 7:
+					$a['nmin'] = $e->plaintext;
+					break;
+				case 8:
+					$a['kehadiran'] = $e->plaintext;
+					break;
+			}
+			$j++;
+		}
+		foreach ($element->find('a[style]') as $e) {
+			$oc = get_string_between($e->getAttribute('onclick'), '(', ')'); 
+			$oc = explode("'", $oc);
+			$a['kelas'] = $oc[1];
+			$a['kode'] = $oc[3];
+		}
+		array_push($krs, $a);
+
+	}
+	curl_close($ch);
+
+	$ret = array('bio' => $b, 
+				'krs'	=> $krs);
+
+	return $ret;
+}
+
+
+
+function detail_matkul($postinfo, $kls, $mk){
+
+	$url="https://sicyca.stikom.edu/?login"; 
+
+	$cookie_file_path = "cookie.txt";
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_NOBODY, false);
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+	curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file_path);
+	//set the cookie the site has for certain features, this is optional
+	curl_setopt($ch, CURLOPT_COOKIE, "cookiename=0");
+	curl_setopt($ch, CURLOPT_USERAGENT,"Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_REFERER, $_SERVER['REQUEST_URI']);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $postinfo);
+
+	$store = curl_exec($ch); 
+
+	//set the URL to the protected file
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=matakuliah&kls='.$kls.'&mk='.$mk);
+
+	//execute the request
+	$content = curl_exec($ch);
+
+	//echo file_get_contents($content);
+	//echo $content;
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+
+	$matkul= [];
+	$i = 0;
+	foreach($html->find('table.sicycatablemanual') as $element){
+		$j = 1;
+		foreach($element->find('tr') as $el){
+			foreach($el->find('th') as $e){
+				$matkul['kode'] = $e->plaintext;
+			}
+			foreach($el->find('td') as $e){
+				switch ($j) {
+					case 2:
+						$matkul['dosen'] = $e->plaintext;
+						
+						break;
+					case 4:
+						$matkul['nmatkul'] = $e->plaintext;
+						break;
+					case 6:
+						$matkul['sks'] = $e->plaintext;
+						break;
+				}
+				$j++;
+			} 
+		}
+		if($i==0){
+			break;
+		} 
+		$i++;
+	}
+	
+	$peserta = [];
+	foreach($html->find('.scrollContent tr') as $element){
+		$a = [];
+		$i=0;
+		foreach($element->find('td') as $el){
+			if($i==0){
+				$a['nim'] = $el->plaintext; 
+			}else{
+				$a['nama'] = $el->plaintext; 
+			}
+			$i++;
+		}
+		array_push($peserta, $a);
+	}
+
+
+	//set the URL to the protected file
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=kehadiran&kls='.$kls.'&mk='.$mk);
+
+	//execute the request
+	$content = curl_exec($ch);
+
+	curl_close($ch);
+	//echo file_get_contents($content);
+	//echo $content;
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+	$kehadiran = [];
+	foreach($html->find('.sicycatablemanual tr') as $element){
+		$a = [];
+		$i=0;
+		foreach($element->find('td') as $el){
+			if($i==0){
+				$a['tanggal'] = $el->plaintext; 
+			}elseif($i==1){
+				$a['jam'] = $el->plaintext; 
+			}elseif($i==2){
+				$a['kdosen'] = $el->plaintext; 
+			}elseif($i==3){
+				$a['kmhs'] = $el->plaintext; 
+			}
+			$i++;
+		}
+		array_push($kehadiran, $a);
+	}
+	$krs = array(
+				'matkul' => $matkul, 
+				'peserta' => $peserta, 
+				'kehadiran' => $kehadiran, 
+				);
+
+	return $krs; 
 }
 
 if(isset($_GET['login'])){
@@ -175,21 +371,11 @@ if(isset($_GET['login'])){
 	$pin = htmlspecialchars($_GET['pin']);
 
 	$p_info = "nim=$nim&pin=$pin";
-	//$txt = "user id date";
-	//$myfile = file_put_contents('pinfo.txt', $p_info.PHP_EOL , FILE_APPEND | LOCK_EX);
 	$bio = cek_log($p_info);
-	$jd = [];
-	$a = array(
-					'nama' 		=> $bio[0], 
-					'nim' 		=> $bio[1], 
-					'email' 	=> $bio[2], 
-					'progstudi' => $bio[3], 
-					'jk' 		=> $bio[4], 
-					'ttl'	 	=> $bio[5], 
-					'agama' 	=> $bio[6], 
-					);
-	echo json_encode($a); 
+	
+	echo json_encode($bio); 
 }
+
 
 
 
@@ -218,4 +404,14 @@ if(isset($_GET['nim'])){
 }
 
 
+if(isset($_GET['detail_matkul'])){
+	$nim = htmlspecialchars($_GET['anim']);
+	$pin = htmlspecialchars($_GET['pin']);
+	$kls = htmlspecialchars($_GET['kls']);
+	$mk = htmlspecialchars($_GET['mk']);
+
+	$p_info = "nim=$nim&pin=$pin";
+	$krs = detail_matkul($p_info, $kls, $mk);
+	echo json_encode($krs); 
+}
 ?>
