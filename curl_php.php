@@ -241,6 +241,7 @@ function cek_log($pi){
 }
 
 
+
 function detail_matkul($pi, $kls, $mk){
 
 	$url="https://sicyca.stikom.edu/?login"; 
@@ -328,6 +329,7 @@ function detail_matkul($pi, $kls, $mk){
 
 	$html = $dom->load($content, true, true);
 	$kehadiran = [];
+	$j=0;
 	foreach($html->find('.sicycatablemanual tr') as $element){
 		$a = [];
 		$i=0;
@@ -343,7 +345,10 @@ function detail_matkul($pi, $kls, $mk){
 			}
 			$i++;
 		}
-		array_push($kehadiran, $a);
+		if($j>0){
+			array_push($kehadiran, $a);
+		}
+		$j++;
 	}
 	$krs = array(
 				'matkul' => $matkul, 
@@ -353,7 +358,6 @@ function detail_matkul($pi, $kls, $mk){
 
 	return $krs; 
 }
-
 if(isset($_GET['login'])){
 	$nim = htmlspecialchars($_GET['anim']);
 	$pin = htmlspecialchars($_GET['pin']);
