@@ -406,4 +406,47 @@ if(isset($_GET['detail_matkul'])){
 	$krs = detail_matkul($p_info, $kls, $mk);
 	echo json_encode($krs); 
 }
+
+
+if(isset($_GET['cek'])){
+	$nim = htmlspecialchars($_GET['anim']);
+	$pin = htmlspecialchars($_GET['pin']);
+
+	$p_info = "nim=$nim&pin=$pin";
+	$krs = cek($p_info);
+	echo $krs;
+	//echo json_encode($krs); 
+}
+
+
+
+function cek($pi){
+
+	$url="https://sicyca.stikom.edu/?login"; 
+	$postinfo = $pi;
+	$cookie_file_path = "cookie.txt";
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_NOBODY, false);
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+	curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file_path);
+	curl_setopt($ch, CURLOPT_COOKIE, "cookiename=0");
+	curl_setopt($ch, CURLOPT_USERAGENT,"Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_REFERER, $_SERVER['REQUEST_URI']);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $postinfo);
+
+	$store = curl_exec($ch); 
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik');
+	$krs = curl_exec($ch);
+	return $krs; 
+}
 ?>
