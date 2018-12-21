@@ -515,7 +515,7 @@ function cek($pi){
 	$i=0;
 	$krs = [];
 	foreach($html->find('#tableView tr') as $element){
-		//echo $element;
+		echo $element;
 		$a = [];
 		$j=0;
 		foreach ($element->find('td') as $e) {
