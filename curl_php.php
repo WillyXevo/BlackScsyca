@@ -414,8 +414,8 @@ if(isset($_GET['cek'])){
 
 	$p_info = "nim=$nim&pin=$pin";
 	$krs = cek($p_info);
-	echo $krs;
-	//echo json_encode($krs); 
+	//echo $krs;
+	echo json_encode($krs); 
 }
 
 
@@ -444,9 +444,121 @@ function cek($pi){
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $postinfo);
 
-	$store = curl_exec($ch); 
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik');
-	$krs = curl_exec($ch);
-	return $krs; 
+	$store = curl_exec($ch);
+
+	//set the URL to the protected file
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/biodata');
+
+	//execute the request
+	$content = curl_exec($ch);
+
+
+	$error = curl_error($ch);
+	$info = curl_getinfo($ch);
+
+	echo '<pre>';
+	echo 'INFO : <br>';
+	print_r($info);
+	echo "<hr>";
+	echo 'ERROR : <br>';
+	echo $error;
+	echo "<hr>";
+	echo '</pre>';
+	
+
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+	echo $html;
+	$i = 0;
+	$dt = [];
+	foreach($html->find('table.tabtable tr') as $element){
+		if($element->find('td',1)){
+			if($i<=7){
+				array_push($dt, $element->find('td',1)->plaintext);
+			}
+		}
+		$i++;
+	}
+
+	$b = array(
+					'nama' 		=> $dt[0], 
+					'nim' 		=> $dt[1], 
+					'email' 	=> $dt[2], 
+					'progstudi' => $dt[3], 
+					'jk' 		=> $dt[4], 
+					'ttl'	 	=> $dt[5], 
+					'agama' 	=> $dt[6], 
+					);
+	
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/krs');
+
+	//execute the request
+	$content = curl_exec($ch);
+
+	$error = curl_error($ch);
+	$info = curl_getinfo($ch);
+
+	echo '<pre>';
+	echo 'INFO : <br>';
+	print_r($info);
+	echo "<hr>";
+	echo 'ERROR : <br>';
+	echo $error;
+	echo "<hr>";
+	echo '</pre>';
+
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+	echo $html;
+	$i=0;
+	$krs = [];
+	foreach($html->find('#tableView tr') as $element){
+		//echo $element;
+		$a = [];
+		$j=0;
+		foreach ($element->find('td') as $e) {
+			//echo $el->plaintext.' | ';
+			switch ($j) {
+				case 0:
+					$a['hari'] = $e->plaintext;
+					break;
+				case 1:
+					$a['waktu'] = $e->plaintext;
+					break;
+				case 2:
+					$a['matkul'] = $e->plaintext;
+					break;
+				case 4:
+					$a['ruang'] = $e->plaintext;
+					break;
+				case 5:
+					$a['sks'] = $e->plaintext;
+					break;
+				case 7:
+					$a['nmin'] = $e->plaintext;
+					break;
+				case 8:
+					$a['kehadiran'] = $e->plaintext;
+					break;
+			}
+			$j++;
+		}
+		foreach ($element->find('a[style]') as $e) {
+			$oc = get_string_between($e->getAttribute('onclick'), '(', ')'); 
+			$oc = explode("'", $oc);
+			$a['kelas'] = $oc[1];
+			$a['kode'] = $oc[3];
+		}
+		array_push($krs, $a);
+
+	}
+	curl_close($ch);
+
+	$ret = array('bio' => $b, 
+				'krs'	=> $krs);
+
+	return $ret; 
 }
 ?>
