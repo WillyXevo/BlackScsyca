@@ -561,4 +561,118 @@ function cek($pi){
 
 	return $ret; 
 }
+
+
+
+if(isset($_GET['ujian'])){
+	$nim = htmlspecialchars($_GET['anim']);
+	$pin = htmlspecialchars($_GET['pin']);
+
+	$p_info = "nim=$nim&pin=$pin";
+	$ujian = jadwal_ujian($p_info);
+	echo '<pre>';
+	echo json_encode($ujian);
+	echo '</pre>';
+}
+
+function jadwal_ujian($pi){
+
+	$url="https://sicyca.stikom.edu/?login"; 
+	$postinfo = $pi;
+
+	$cookie_file_path = "cookie.txt";
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_NOBODY, false);
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+	curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file_path);
+	//set the cookie the site has for certain features, this is optional
+	curl_setopt($ch, CURLOPT_COOKIE, "cookiename=0");
+	curl_setopt($ch, CURLOPT_USERAGENT,"Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_REFERER, $_SERVER['REQUEST_URI']);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $postinfo);
+
+	$store = curl_exec($ch); 
+
+	//set the URL to the protected file
+	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/jadwal-ujian/');
+
+	//execute the request
+	$content = curl_exec($ch);
+
+	curl_close($ch);
+	//echo file_get_contents($content);
+	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
+
+	$html = $dom->load($content, true, true);
+	
+
+	$jadwal = [];
+	$i = 0;
+	$co = 0;
+			$ujn = [];
+	foreach($html->find('div.content') as $div){
+		if($co==2){
+			$ncdiv=0;
+			foreach($div->find('div.tabletitle') as $cdiv){
+				
+
+				if($ncdiv==0){
+					$ujn['uts'] = array(
+										'judul'=> $cdiv->plaintext,
+										'jadwal' => get_jadwal_ujian($div, $cdiv) 
+										);
+				}else{
+					$ujn['uas'] = array(
+										'judul'=> $cdiv->plaintext,
+										'jadwal' => get_jadwal_ujian($div, $cdiv) 
+										);
+				}
+				$ncdiv++;
+			}
+			array_push($jadwal, $ujn);
+		}
+		$co++;
+	}
+	return $jadwal;
+}
+
+function get_jadwal_ujian($div, $cdiv){
+
+	$next = $cdiv->next_sibling();
+	$regexp='/\<table class\=\"sicycatable\">(.*?)<\/table\>/s';
+	preg_match($regexp, $next, $ketemu);
+	if(!empty($ketemu)){
+		$jadwal = [];
+		$i=0;
+		foreach($div->find('table.sicycatable tr') as $element){
+			if($element->plaintext!=''){
+				if($i>0){
+					$dt = [];
+					foreach($element->find('td') as $el){
+				   	 	array_push($dt, $el->plaintext);
+					} 
+					$tmstm = convert_date(explode(", ", $dt[0])[1]);
+					$jmstm = explode("-", $dt[1]);
+					$dt[5] = date("d-m-Y H:i:s", strtotime($tmstm.' '.$jmstm[0]));
+					$dt[6] = date("d-m-Y H:i:s", strtotime($tmstm.' '.$jmstm[1]));
+				    array_push($jadwal, $dt);
+				}
+			    $i++;
+			}
+		}
+		return $jadwal;
+	}else{
+		return null;
+	}
+}
 ?>
