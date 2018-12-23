@@ -1362,8 +1362,8 @@ class simple_html_dom
             return true;
         }
 
-       /*if (!preg_match("/^[\w-:]+$/", $tag)) {
-            $node->_[HDOM_INFO_TEXT] = '<' . $tag . $this->copy_until('<>');
+        if (!preg_match("/^[\w-:]+$/", $tag, $res)) {
+            $node->_[HDOM_INFO_TEXT] = '<' . $res . $this->copy_until('<>');
             if ($this->char==='<') {
                 $this->link_nodes($node, false);
                 return true;
@@ -1373,7 +1373,7 @@ class simple_html_dom
             $this->link_nodes($node, false);
             $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
             return true;
-        }*/
+        }
 
         // begin tag
         $node->nodetype = HDOM_TYPE_ELEMENT;
