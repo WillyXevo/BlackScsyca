@@ -64,7 +64,7 @@ function get_bulan($v='')
 
 function lihat_jadwal_log($pi){
 
-	$url="https://sicyca.stikom.edu/?login"; 
+	$url="https://dinamika.ac.id/?login"; 
 	$postinfo = $pi;
 
 	$cookie_file_path = "cookie.txt";
@@ -91,7 +91,7 @@ function lihat_jadwal_log($pi){
 	$store = curl_exec($ch); 
 
 	//set the URL to the protected file
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/akademik');
 
 	//execute the request
 	$content = curl_exec($ch);
@@ -125,7 +125,7 @@ function lihat_jadwal_log($pi){
 
 
 function cek_log($pi){
-	$url="https://sicyca.stikom.edu/?login"; 
+	$url="https://dinamika.ac.id/?login"; 
 	$postinfo = $pi;
 
 	$cookie_file_path = "cookie.txt";
@@ -152,7 +152,7 @@ function cek_log($pi){
 	$store = curl_exec($ch); 
 
 	//set the URL to the protected file
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/biodata');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/biodata');
 
 	//execute the request
 	$content = curl_exec($ch);
@@ -182,7 +182,7 @@ function cek_log($pi){
 					'agama' 	=> $dt[6], 
 					);
 	
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/krs');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/akademik/krs');
 
 	//execute the request
 	$content = curl_exec($ch);
@@ -244,7 +244,7 @@ function cek_log($pi){
 
 function detail_matkul($pi, $kls, $mk){
 
-	$url="https://sicyca.stikom.edu/?login"; 
+	$url="https://dinamika.ac.id/?login"; 
 	$postinfo = $pi;
 	$cookie_file_path = "cookie.txt";
 
@@ -268,7 +268,7 @@ function detail_matkul($pi, $kls, $mk){
 
 	$store = curl_exec($ch); 
 
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=matakuliah&kls='.$kls.'&mk='.$mk);
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/table-proxy/?t=matakuliah&kls='.$kls.'&mk='.$mk);
 	
 	$content = curl_exec($ch);
 	$dom = new simple_html_dom(null, true, true, DEFAULT_TARGET_CHARSET, true, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT);
@@ -321,7 +321,7 @@ function detail_matkul($pi, $kls, $mk){
 	}
 
 
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/table-proxy/?t=kehadiran&kls='.$kls.'&mk='.$mk);
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/table-proxy/?t=kehadiran&kls='.$kls.'&mk='.$mk);
 
 	$content = curl_exec($ch);
 	curl_close($ch);
@@ -422,7 +422,7 @@ if(isset($_GET['cek'])){
 
 function cek($pi){
 
-	$url="https://sicyca.stikom.edu/?login"; 
+	$url="https://dinamika.ac.id/?login"; 
 	$postinfo = $pi;
 	$cookie_file_path = "cookie.txt";
 
@@ -447,7 +447,7 @@ function cek($pi){
 	$store = curl_exec($ch);
 
 	//set the URL to the protected file
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/biodata');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/biodata');
 
 	//execute the request
 	$content = curl_exec($ch);
@@ -491,7 +491,7 @@ function cek($pi){
 					'agama' 	=> $dt[6], 
 					);
 	
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/krs');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/akademik/krs');
 
 	//execute the request
 	$content = curl_exec($ch);
@@ -577,7 +577,7 @@ if(isset($_GET['ujian'])){
 
 function jadwal_ujian($pi){
 
-	$url="https://sicyca.stikom.edu/?login"; 
+	$url="https://dinamika.ac.id/?login"; 
 	$postinfo = $pi;
 
 	$cookie_file_path = "cookie.txt";
@@ -604,7 +604,7 @@ function jadwal_ujian($pi){
 	$store = curl_exec($ch); 
 
 	//set the URL to the protected file
-	curl_setopt($ch, CURLOPT_URL, 'https://sicyca.stikom.edu/akademik/jadwal-ujian/');
+	curl_setopt($ch, CURLOPT_URL, 'https://dinamika.ac.id/akademik/jadwal-ujian/');
 
 	//execute the request
 	$content = curl_exec($ch);
